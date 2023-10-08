@@ -2,76 +2,67 @@ package main
 
 import (
 	"fmt"
-	"net"
 	"strconv"
-	"time"
 
 	"github.com/Lennart1978/Portscanner/misc"
 )
 
 func main() {
 
-	var (
-		ports_open int
-		portso     []int
-	)
+	var Scanner Portscanner  // Create a Portscanner instance
 
-	greeting()
+	Scanner.Greet()  // Display greeting message
 
-	for {
-		fmt.Printf("Hello %s please enter target host name (or q to quit):", misc.GetUserName())
-		host := misc.Input()
+	for {  // Start an infinite loop to continually prompt the user for input
+		fmt.Printf("Hello %s please enter target host name (or q to quit):", misc.GetUserName())  // Prompt for target host
+		Scanner.Host = misc.Input()  // Get user input for target host
 
-		if host == "q" || host == "Q" {
-			break
+		if Scanner.Host == "q" || Scanner.Host == "Q" {  // Check if the user wants to quit
+			break  // Exit the loop if the user enters 'q' or 'Q'
 		}
 
-		fmt.Printf("Enter number of ports to scan:")
-		p := misc.Input()
+		fmt.Printf("Enter number of ports to scan or 'all':")  // Prompt for number of ports to scan
 
-		port, _ := strconv.Atoi(p)
+		p := misc.Input()  // Get user input for number of ports
 
-		totalPorts := port + 1
-		portsScanned := 0
+		if p == "all" {
+			Scanner.Port = 65535  // Set to scan all ports if user enters 'all'
+		} else {
+			Scanner.Port, _ = strconv.Atoi(p)  // Convert user input to integer
+			if Scanner.Port < 1 || Scanner.Port > 65535 {
+				Scanner.Port = 65535  // Set to scan all ports if user input is out of range
+			}
+		}
 
-		fmt.Print("Progress: 0.00%") // Initialanzeige
+		Scanner.totalPorts = Scanner.Port + 1  // Set the total number of ports to scan
 
-		for count := 0; count <= port; count++ {
-			if Portscan(host, count) {
-				fmt.Printf("\033[1;42m --> Port: %d is open ! ", count)
-				fmt.Println("\033[0m")
-				ports_open++
-				portso = append(portso, count)
+		fmt.Print("Progress: 0.00%")  // Initial progress display
+
+		for Scanner.scanningPort < Scanner.totalPorts {  // Loop through all ports to be scanned
+			Scanner.Port = Scanner.scanningPort  // Set the current port to scan
+			if Scanner.Scan() {
+				Scanner.Print()  // Print the port if it's open
+				Scanner.ports_open++  // Increment the count of open ports
+				Scanner.portso = append(Scanner.portso, Scanner.scanningPort)  // Add the open port to the list
 			}
 
-			portsScanned++
-			progress := float64(portsScanned) / float64(totalPorts) * 100
-			fmt.Printf("\rProgress: %.2f%%⚡", progress) // Zeile überschreiben
+			Scanner.Pprogress()  // Update and display the scanning progress
+			Scanner.scanningPort++  // Move to the next port
+			Scanner.portsScanned++  // Increment the count of scanned ports
 		}
 
-		if ports_open > 1 {
-			fmt.Printf("\n\033[31m✅ %d ports are open:\n", ports_open)
-		} else if ports_open == 1 {
-			fmt.Printf("\n\033[31m✅ %d port is open:\n", ports_open)
+		// Display the results based on the number of open ports found
+		if Scanner.ports_open > 1 {
+			fmt.Printf("\n\033[31m✅ %d ports are open:\n", Scanner.ports_open)
+		} else if Scanner.ports_open == 1 {
+			fmt.Printf("\n\033[31m✅ %d port is open:\n", Scanner.ports_open)
 		} else {
 			fmt.Printf("\n\033[31m⛔ No ports are open !\n")
 		}
 
-		fmt.Println(portso)
-		fmt.Println("\033[0m")
-		portso = nil
-		ports_open = 0
+		fmt.Println(Scanner.portso)  // Print the list of open ports
+		fmt.Println("\033[0m")  // Reset terminal color
+
+		Scanner.Reset()  // Reset the scanner for the next iteration
 	}
-}
-
-func Portscan(host string, ip int) bool {
-	target := host + ":" + strconv.Itoa(ip)
-	_, err := net.DialTimeout("tcp", target, time.Millisecond*30)
-	return err == nil
-}
-
-func greeting() {
-	fmt.Println("\033[34m✨Welcome to Lennart's Portscanner V1.5✨")
-	fmt.Println("\033[34m⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛")
-	fmt.Println("\033[0m")
 }
