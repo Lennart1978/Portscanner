@@ -46,15 +46,15 @@ func main() {
 
 			portsScanned++
 			progress := float64(portsScanned) / float64(totalPorts) * 100
-			fmt.Printf("\rProgress: %.2f%%", progress) // Zeile überschreiben
+			fmt.Printf("\rProgress: %.2f%%⚡", progress) // Zeile überschreiben
 		}
 
 		if ports_open > 1 {
-			fmt.Printf("\n\033[31m%d ports are open:\n", ports_open)
+			fmt.Printf("\n\033[31m✅ %d ports are open:\n", ports_open)
 		} else if ports_open == 1 {
-			fmt.Printf("\n\033[31m%d port is open:\n", ports_open)
+			fmt.Printf("\n\033[31m✅ %d port is open:\n", ports_open)
 		} else {
-			fmt.Printf("\n\033[31mNo ports are open !\n")
+			fmt.Printf("\n\033[31m⛔ No ports are open !\n")
 		}
 
 		fmt.Println(portso)
@@ -71,7 +71,7 @@ func Portscan(host string, ip int) bool {
 }
 
 func greeting() {
-	fmt.Println("\033[34mWelcome to Lennart's Portscanner V1.0")
-	fmt.Println("\033[34m-------------------------------------")
+	fmt.Println("\033[34m✨Welcome to Lennart's Portscanner V1.5✨")
+	fmt.Println("\033[34m⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛")
 	fmt.Println("\033[0m")
 }
